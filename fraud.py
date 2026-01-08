@@ -38,19 +38,32 @@ print("Path to dataset files:", path)
 #%% [markdown]
 # ## -- VARIABLES CONFIG --
 #%%
-path_dataset = r'C:\Users\savio\.cache\kagglehub\datasets\mlg-ulb\creditcardfraud\versions\3'
+path_dataset = os.path.join(path, 'creditcard.csv')
 
 #%% [markdown]
 # # -- READ AND SAMPLE DATASET --
 #%%
-df = pd.read_csv(f'{path_dataset}\creditcard.csv')
+df = pd.read_csv(path_dataset)
 df.head(3)
 
 #%% [markdown]
-# # --- UNDERSTANDING DATASET ---
+# # --- UNDERSTANDING DATASET - EDA ---
 #%%
 #%% [markdown]
 # ## -- FIRST IMPRESSIONS --
 #%%
+# DATASET INFOS
 print(df.info())
 print(f'\n Shape df: {df.shape}')
+#%%
+# UNDERSTAND TARGET VARIABLE
+df_class_count = df['Class'].value_counts() # COUNTING HOW MUCH VALUES WE HAVE TO ZERO VALUE AND ONE VALUE
+df_class_count
+#%%
+# PLOTING CLASS VALUE COUNTS
+
+plt.figure(figsize=(5,5))
+sns.barplot(data=df_class_count)
+plt.show()
+
+
