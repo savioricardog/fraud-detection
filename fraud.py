@@ -120,8 +120,11 @@ print(X_train.head(3))
 #%%
 # FIRST FIT
 
-log_reg = LogisticRegression(max_iter=500, penalty='l2', solver='saga') # INSTANTING MODEL
-first_fit = log_reg.fit(X_train, y_train) # FITTING X_TRAIN AND Y_TRAIN
+rand_forr = RandomForestClassifier(n_estimators=500,
+                                   n_jobs=5, 
+                                   verbose=1, 
+                                   class_weight='balanced') # SWITCHING LOGISTIC REGRESSION TO RANDONFOREST
+first_fit = rand_forr.fit(X_train, y_train) # FITTING X_TRAIN AND Y_TRAIN
 
 #%%
 # FIRST PREDICT
@@ -130,10 +133,41 @@ first_predict = first_fit.predict(X_test) # GENERATING PREDICT W/ X_TEST
 #%%
 # PREDICT METRICS. PREDICT VS Y_TEST
 class_report = classification_report(first_predict, y_test)
-print(f'Classification report:\n{class_report}')
+print("\n" + "="*40)
+print(F'📋 CLASSIFICATION REPORT: MODEL {rand_forr.estimators_}')
+print("="*40)
+print(class_report)
 
-conf_matrix = confusion_matrix(first_predict, y_test)
-print(f'Confusion Matrix:\n{conf_matrix}')
+cm = confusion_matrix(first_predict, y_test)
+
+print("\n" + "="*40)
+print(F'📋 CONFUSION MATRIX REPORT: {rand_forr.estimators_}')
+print("="*40)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm,
+                            display_labels=['Verdadeiro','Falso'])
+fig, ax = plt.subplots(figsize=(8,6))
+disp.plot(cmap='Blues', ax=ax, values_format='d')
+plt.title("📋 CONFUSION MATRIX")
+plt.show()
+
+#%%
+# FEATURE IMPORTANCE TO UNDERSTAND BEST USED FEATURES
+importance = rand_forr.feature_importances_
+feature_names = X_train.columns
+
+
+feature_importances = pd.DataFrame({
+    'Feature': feature_names,
+    'Importance': importance
+}).sort_values(by='Importance', ascending=False)
+
+plt.figure(figsize=(10,6))
+sns.barplot(x='Importance', y='Feature', data=feature_importances, palette='viridis', legend=False, hue='Feature')
+plt.title('Best Features for the Model')
+plt.show()
+
+
+
 
 
 
