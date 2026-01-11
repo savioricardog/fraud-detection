@@ -1,7 +1,7 @@
 # # --- Python ---
-# __pycache__/
-# *.py[cod]
-# *$py.class
+__pycache__/
+*.py[cod]
+*$py.class
 
 # # --- VS Code ---
 .vscode/
@@ -12,11 +12,14 @@
 # *.csv
 # *.xlsx
 # # Se quiser subir uma amostra, crie uma pasta 'data/sample' e tire ela daqui
+fraude_V2.py
+src
+.gitignore
 
 # # --- Jupyter ---
-# .ipynb_checkpoints/
+.ipynb_checkpoints/
 
 # # --- Ambiente Virtual ---
-# env/
-# venv/
-# .env
+env/
+venv/
+.env
