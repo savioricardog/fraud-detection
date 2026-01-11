@@ -1,4 +1,4 @@
-# 🚜 Detecção de Fraudes em transações bancárias (RandomForest + Max_Depth + Class_Weight)
+# 🚜 Detecção de Fraudes em transações bancárias (LightGBM + Learning Rate + Class_Weight)
 
 ## 📋 Sobre o Projeto
 Este projeto resolve um problema muito comum em instituições financeiras: Transações fraudulentas.
@@ -8,11 +8,9 @@ O principal desafio foi lidar com dados de **Alta Especificidade** e **Distribui
 ## 🧠 Estratégia de Modelagem
 
 ### 1. Algoritmo e Paramêtro
-Utilizei o **RandomForest Classifier** com a função objetivo **max_depth** (`None`) e **Clas_Weight** (`None`).
-* **Por que Max_Depth e Class_Weight?** Por que no caso de análise de fraudes o mais díficil é entender a especifidades dos padrôes fraudulentos, e neste caso, a melhor solução é não "travar" o
-max_depth, permitindo a árvore fazer quantas "perguntas" achar necessário para entender o padrão
-da transação fraudulenta, em conjunto com ele, o paramêtro class_weight ajuda muito dizendo para o
-modelo dar mais enfoque na classe minoritária (fraude).
+Utilizei o **LightGBM Classifier** com a função objetivo **Learning Rate** (`0.01`) e **Clas_Weight** (`balanced`).
+* **Por que Learning Rate e Class_Weight?** Por que no caso de análise de fraudes o mais díficil é entender a especifidades dos padrôes fraudulentos, e neste caso, a melhor solução é fazer que o 
+modelo se atende a todo e qualquer detalhe no treinamento, fazendo com que o modelo não passe por uma especificidade de fraude sem detecta-lá. Em conjunto com ele, o paramêtro class_weight ajuda muito dizendo para o modelo dar mais enfoque na classe minoritária (aumenta o peso da classe fraude).
 
 ### 2. Engenharia de Features
 A estrutura de dados foi construída com `Scikit-Learn` incluindo:
@@ -23,15 +21,15 @@ A estrutura de dados foi construída com `Scikit-Learn` incluindo:
 
 | Métricas | Valor Final |
 |----------|-------------|
-| **Precision** | **72%** (Assertividade percentual dos apontamentos de fraude) |
-| **Recall**    | **97%** (Capacidade de detecção) |
-| **F1-Score**  | **83%** (Equilíbrio entre Precision x Recall) |
+| **Precision** | **92%** (Assertividade percentual dos apontamentos de fraude) |
+| **Recall**    | **81%** (Capacidade de detecção) |
+| **F1-Score**  | **86%** (Equilíbrio entre Precision x Recall) |
 
 ### Performance: Matrix de Confusão
 > *O gráfico de matrix de confusão abaixo mostra como se comportou o modelo durante o teste,
-entregando um resultado de apenas **3** fraudes não detectadas*
+entregando um resultado máximo de **24** fraudes não detectadas*
 
-![Matrix de Confusão](img/confusion_matrix_RF.png)
+![Matrix de Confusão](img/confusion_matrix_LIGHT.png)
 
 ## 🚀 Como Rodar o Projeto
 

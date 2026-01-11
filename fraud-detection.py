@@ -18,8 +18,6 @@ from sklearn.ensemble import HistGradientBoostingClassifier, StackingClassifier,
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 import joblib
-
-# from sklearn.compose import 
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 
@@ -121,46 +119,80 @@ print(X_train.head(3))
 # # --- INSTANTING AND FITTING MODEL ---
 #%%
 
-rand_forr = RandomForestClassifier(n_estimators=500,
-                                   n_jobs=5, 
-                                   verbose=1, 
-                                   class_weight='balanced') # SWITCHING LOGISTIC REGRESSION TO RANDONFOREST
-first_fit = rand_forr.fit(X_train, y_train) # FITTING X_TRAIN AND Y_TRAIN
+lightgbm = LGBMClassifier(n_estimators=3000,
+                        learning_rate= 0.01,
+                        num_leaves=95,
+                        max_depth=-1,
+                        class_weight='balanced',
+                        min_child_samples = 3,
+                        subsample  = 0.9,
+                        colsample_bytree = 0.9,
+                        n_jobs = 5,
+                        importance_type='gain',
+                        objective = 'binary',
+                        verbose = -1
+)
+
+first_fit = lightgbm.fit(X_train, y_train) # FITTING X_TRAIN AND Y_TRAIN
 
 #%% [markdown]
 # # --- MODEL PREDICT ---
 #%%
+
 first_predict = first_fit.predict(X_test) # GENERATING PREDICT W/ X_TEST
+first_predict_proba = first_fit.predict_proba(X_test)[:,1]
+
 
 #%% [markdown]
 # # --- ANALYSE METRICS ---
 #%%
 
+novo_limite = 0.30 
+y_pred_ajustado = (first_predict_proba >= novo_limite).astype(int)
+
 # CLASSIFICATION REPORT
-class_report = classification_report(first_predict, y_test)
+class_report = classification_report(y_test, y_pred_ajustado)
 print("\n" + "="*40)
-print(F'📋 CLASSIFICATION REPORT: MODEL {rand_forr.estimators_}')
+print(F'📋 CLASSIFICATION REPORT: MODEL {lightgbm}')
 print("="*40)
 print(class_report) 
 
 # CONFUSION MATRIX
-cm = confusion_matrix(first_predict, y_test)
+cm = confusion_matrix(y_test, first_predict)
 print("\n" + "="*40)
-print(F'📋 CONFUSION MATRIX REPORT: {rand_forr.estimators_}')
+print(F'📋 CONFUSION MATRIX REPORT: {lightgbm}')
 print("="*40)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm,
-                            display_labels=['Verdadeiro','Falso'])
+                            display_labels=['N Fraude','Fraude'])
 fig, ax = plt.subplots(figsize=(8,6))
 disp.plot(cmap='Blues', ax=ax, values_format='d')
 plt.title("📋 CONFUSION MATRIX")
 plt.show()
+
+#%%
+
+y_pred = first_predict
+y_proba = first_predict_proba
+
+df_analise = pd.DataFrame({
+    'Real': y_test,
+    'Previsão': y_pred_ajustado,
+    'Probabilidade': y_proba
+})
+
+
+erros_fatais = df_analise[(df_analise['Real'] == 1) & (df_analise['Previsão'] == 0)]
+
+print('As fraude que o modelo perdeu tinham estas probabilidades: ')
+erros_fatais.sort_values(by=['Probabilidade'], ascending=False)
+#%%
 
 #%% [markdown]
 # ## -- ANALYSING BEST FEATURES --
 #%%
 
 # FEATURE IMPORTANCE TO UNDERSTAND BEST USED FEATURES
-importance = rand_forr.feature_importances_
+importance = lightgbm.feature_importances_
 feature_names = X_train.columns
 
 
@@ -179,7 +211,7 @@ plt.show()
 #%%
 
 final_pack = {
-    'model': rand_forr,
+    'model': lightgbm,
     'scaler_amount': scaler_amount,
     'scaler_time': scaler_time
 }
