@@ -54,9 +54,6 @@ df.head(3)
 
 #%% [markdown]
 # # -- UNDERSTANDING DATASET - EDA --
-#%%
-#%% [markdown]
-# ## -- FIRST IMPRESSIONS --
 #%% [markdown]
 # ## -- DATASET GENERAL INFOS --
 #%%
