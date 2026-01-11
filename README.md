@@ -31,6 +31,13 @@ entregando um resultado máximo de **24** fraudes não detectadas*
 
 ![Matrix de Confusão](img/confusion_matrix_LIGHT.png)
 
+### Performance Financeira
+> *O gráfico de barras abaixo mostra o resultado financeiro do modelo.
+Entregando um valor de **$9.000** dolares de prejuizo evitados, que equivalem a **70%** do total das tentativas de fraude*
+
+![Resultado Financeiro](img/financial_model_impact.png)
+
+
 ## 🚀 Como Rodar o Projeto
 
 1. **Clone o repositório:**

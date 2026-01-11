@@ -39,6 +39,10 @@ pd.set_option('display.max_rows', 500)
 path = kagglehub.dataset_download("mlg-ulb/creditcardfraud")
 print("Path to dataset files:", path)
 
+#%%
+
+df[df['Class'] == 1].groupby('Class')['Amount'].sum()
+
 #%% [markdown]
 # ## -- VARIABLES CONFIG --
 #%%
@@ -121,9 +125,10 @@ print(X_train.head(3))
 
 lightgbm = LGBMClassifier(n_estimators=3000,
                         learning_rate= 0.01,
-                        num_leaves=95,
+                        num_leaves=100,
                         max_depth=-1,
-                        class_weight='balanced',
+                        class_weight={0: 1, 1: 100000},
+                        is_unbalance = False,
                         min_child_samples = 3,
                         subsample  = 0.9,
                         colsample_bytree = 0.9,
@@ -147,11 +152,11 @@ first_predict_proba = first_fit.predict_proba(X_test)[:,1]
 # # --- ANALYSE METRICS ---
 #%%
 
-novo_limite = 0.30 
-y_pred_ajustado = (first_predict_proba >= novo_limite).astype(int)
+new_limit = 0.10 
+y_pred_ajust = (first_predict_proba >= new_limit).astype(int)
 
 # CLASSIFICATION REPORT
-class_report = classification_report(y_test, y_pred_ajustado)
+class_report = classification_report(y_test, y_pred_ajust)
 print("\n" + "="*40)
 print(F'📋 CLASSIFICATION REPORT: MODEL {lightgbm}')
 print("="*40)
@@ -163,29 +168,68 @@ print("\n" + "="*40)
 print(F'📋 CONFUSION MATRIX REPORT: {lightgbm}')
 print("="*40)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm,
-                            display_labels=['N Fraude','Fraude'])
+                            display_labels=['Not Fraud','Fraud'])
 fig, ax = plt.subplots(figsize=(8,6))
 disp.plot(cmap='Blues', ax=ax, values_format='d')
 plt.title("📋 CONFUSION MATRIX")
 plt.show()
 
-#%%
-
+# DATAFRAME PROBABILITIES OF UNDETECTED FRAUD TRANSACTIONS
 y_pred = first_predict
 y_proba = first_predict_proba
-
-df_analise = pd.DataFrame({
+df_analyse = pd.DataFrame({
     'Real': y_test,
-    'Previsão': y_pred_ajustado,
-    'Probabilidade': y_proba
+    'Prev': y_pred_ajust,
+    'Prob': y_proba,
+})
+fatal_error = df_analyse[(df_analyse['Real'] == 1) & (df_analyse['Prev'] == 0)]
+
+print('Probability of undetected fraud transactions: ')
+fatal_error.sort_values(by=['Prob'], ascending=False)
+
+#%% [markdown]
+# # --- FINANCIAL RETURN ---
+#%%
+real_values = df.loc[X_test.index, 'Amount']
+
+df_return = pd.DataFrame({
+    'Real': y_test,
+    'Prev': y_pred_ajust,
+    'Amount': real_values
 })
 
+detected_frauds = df_return[(df_return['Real'] == 1) & (df_return['Prev'] == 1)]
+money_economy = detected_frauds['Amount'].sum()
 
-erros_fatais = df_analise[(df_analise['Real'] == 1) & (df_analise['Previsão'] == 0)]
+undetected_frauds = df_return[(df_return['Real'] == 1) & (df_return['Prev'] == 0)]
+money_loss = undetected_frauds['Amount'].sum()
 
-print('As fraude que o modelo perdeu tinham estas probabilidades: ')
-erros_fatais.sort_values(by=['Probabilidade'], ascending=False)
-#%%
+print(f'Money saved by model: {money_economy:.0f}')
+print(f'Money lost (ERRORS): {money_loss:.0f}')
+print(f'Money saved rate: {money_economy / (money_economy+money_loss):.1%}')
+
+categories = ['Money Saved','Money loss']
+values = [money_economy, money_loss]
+color = ['#2ecc71', '#e74c3c']
+
+plt.figure(figsize=(10,6))
+bars = plt.bar(categories, values, color=color, width=0.6)
+plt.title('Financial model impact', fontsize=16, pad=20)
+plt.ylabel('Monetary Value', fontsize=12)
+plt.grid(axis='y', linestyle='--', alpha=0.5)
+sns.despine()
+
+def add_labels(bars):
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2.,
+                 height + (max(values) * 0.01), 
+                 f'${height:,.0f}',
+                 ha='center', va='bottom', fontsize=14, color="#080808")
+
+add_labels(bars)
+plt.tight_layout()
+plt.show()
 
 #%% [markdown]
 # ## -- ANALYSING BEST FEATURES --
@@ -194,7 +238,6 @@ erros_fatais.sort_values(by=['Probabilidade'], ascending=False)
 # FEATURE IMPORTANCE TO UNDERSTAND BEST USED FEATURES
 importance = lightgbm.feature_importances_
 feature_names = X_train.columns
-
 
 feature_importances = pd.DataFrame({
     'Feature': feature_names,
