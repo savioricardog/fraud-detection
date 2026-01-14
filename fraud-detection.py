@@ -39,10 +39,6 @@ pd.set_option('display.max_rows', 500)
 path = kagglehub.dataset_download("mlg-ulb/creditcardfraud")
 print("Path to dataset files:", path)
 
-#%%
-
-df[df['Class'] == 1].groupby('Class')['Amount'].sum()
-
 #%% [markdown]
 # ## -- VARIABLES CONFIG --
 #%%
@@ -128,19 +124,16 @@ lightgbm = LGBMClassifier(n_estimators=3000,
                         learning_rate= 0.01,
                         num_leaves=100,
                         max_depth=-1,
-                        # class_weight='balanced',
-                        scale_pos_weight=ratio * 2,
-                        is_unbalance = False,
+                        class_weight='balanced',
+                        # scale_pos_weight=ratio * 2,
+                        # is_unbalance = False,
                         min_child_samples = 3,
                         subsample  = 0.9,
                         colsample_bytree = 0.9,
                         n_jobs = 5,
                         importance_type='gain',
                         objective = 'binary',
-                        verbose = -1,
-                        max_bin=512,
-                        boosting_type='dart',  # <-- MUDANÇA DE MOTOR
-                        xgboost_dart_mode=True,
+                        verbose = -1
 )
 
 first_fit = lightgbm.fit(X_train, y_train) # FITTING X_TRAIN AND Y_TRAIN
@@ -165,7 +158,7 @@ class_report = classification_report(y_test, y_pred_ajust)
 print("\n" + "="*40)
 print(F'📋 CLASSIFICATION REPORT: MODEL {lightgbm}')
 print("="*40)
-print(class_report) 
+print(f'Class Report: {class_report}') 
 
 # CONFUSION MATRIX
 cm = confusion_matrix(y_test, first_predict)

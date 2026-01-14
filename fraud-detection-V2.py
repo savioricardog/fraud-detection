@@ -142,14 +142,14 @@ params = [
     # --- CENÁRIO 1: LIGHTGBM (O Veloz - Microsoft) - ATENÇÃO: É muito leve e rápido.  ---
     {
         'modelo': [LGBMClassifier(n_jobs=1, force_col_wise=True)],      # DEFINING NUMBER OS PROCESSOR USED IN PROCESS
-        'modelo__n_estimators': [1500, 2500],                           # ESTIMATED NUMBER OF TREES
-        'modelo__learning_rate': [0.01, 0.05],                          # STEP SIZE (ETA) | LOW = MOST ACCURATE, BUT TAKES MORE TIME
-        'modelo__num_leaves': [80, 120],                                # NUMBER OF NODES IN EACH BRANCH (MUCH HIGH VALUES = HIGH OVERFITTING PROBABILITY ) | MAIN PARAM FROM LIGHTGBM
+        'modelo__n_estimators': [3000],                                 # ESTIMATED NUMBER OF TREES
+        'modelo__learning_rate': [0.01],                                # STEP SIZE (ETA) | LOW = MOST ACCURATE, BUT TAKES MORE TIME
+        'modelo__num_leaves': [100],                                    # NUMBER OF NODES IN EACH BRANCH (MUCH HIGH VALUES = HIGH OVERFITTING PROBABILITY ) | MAIN PARAM FROM LIGHTGBM
         'modelo__max_depth': [-1],                                      # SIZE OF EACH TREE BRANCH
         'modelo__class_weight' : ['balanced'],                          # DEFINING WEIGHTS FOR CLASS FRAUD
-        'modelo__min_child_samples': [2, 10],                           # DEFINING AMOUNT OF VALUES TO CAPTURE THE PATTERN
-        'modelo__subsample': [0.7, 0.9],                                # % RAMDOM SAMPLES OF ROWS FOR EACH TRAIN IN EACH BRANCH 
-        'modelo__colsample_bytree': [0.7, 0.9],                         # % RAMDOM SAMPLES OF COLS FOR EACH TRAIN IN EACH BRANCH |
+        'modelo__min_child_samples': [3],                               # DEFINING AMOUNT OF VALUES TO CAPTURE THE PATTERN
+        'modelo__subsample': [0.9],                                     # % RAMDOM SAMPLES OF ROWS FOR EACH TRAIN IN EACH BRANCH 
+        'modelo__colsample_bytree': [0.9],                              # % RAMDOM SAMPLES OF COLS FOR EACH TRAIN IN EACH BRANCH |
         'modelo__importance_type': ['gain'],                            # GAIN DEFINE QUALITY AGAINST AMOUNT
         'modelo__boosting_type': ['gbdt'],                              # CHANGE THE MODEL ENGINE 
         'modelo__objective':['binary']                                  # DEFINE HOW THE VALUE OF COLUMN TARGET IS
@@ -192,17 +192,22 @@ grid_predict_proba = grid.predict_proba(X_test)[:,1] # GENERATING PREDICT PROBAB
 new_limit = 0.10 # DEFINE MANUALLY
 y_pred_ajust = (grid_predict_proba >= new_limit).astype(int)  # DEFINING AJUST PROBABILITIES
 
+# FEATURE IMPORTANCE TO UNDERSTAND BEST USED FEATURES
+best_model = grid.best_estimator_.named_steps['modelo']
+importance = best_model.feature_importances_
+feature_names = X_train.columns
+
 # CLASSIFICATION REPORT
 class_report = classification_report(y_test, y_pred_ajust)
 print("\n" + "="*40)
-print(F'📋 CLASSIFICATION REPORT: MODEL {grid}')
+print(F'📋 CLASSIFICATION REPORT: MODEL {best_model}')
 print("="*40)
-print(class_report) 
+print(f'Class Report: {class_report}') 
 
 # CONFUSION MATRIX
 cm = confusion_matrix(y_test, grid_predict)
 print("\n" + "="*40)
-print(F'📋 CONFUSION MATRIX REPORT: {grid}')
+print(F'📋 CONFUSION MATRIX REPORT: {best_model}')
 print("="*40)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm,
                             display_labels=['Not Fraud','Fraud'])
@@ -271,11 +276,6 @@ plt.show()
 #%% [markdown]
 # ## -- ANALYSING BEST FEATURES --
 #%%
-
-# FEATURE IMPORTANCE TO UNDERSTAND BEST USED FEATURES
-best_model = grid.best_estimator_.named_steps['modelo']
-importance = best_model.feature_importances_
-feature_names = X_train.columns
 
 feature_importances = pd.DataFrame({
     'Feature': feature_names,

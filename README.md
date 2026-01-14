@@ -8,7 +8,7 @@ O principal desafio foi lidar com dados de **Alta Especificidade** e **Distribui
 ## 🧠 Estratégia de Modelagem
 
 ### 1. Algoritmo e Paramêtro
-Utilizei o **LightGBM Classifier** com a função objetivo **Learning Rate** (`0.01`) e **Clas_Weight** (`{0: 1, 1: 100000}`).
+Utilizei o **LightGBM Classifier** com a função objetivo **Learning Rate** (`0.01`) e **Class_Weight** (`balanced`).
 * **Por que Learning Rate e Class_Weight?** Por que no caso de análise de fraudes o mais díficil é entender a especifidades dos padrôes fraudulentos, e neste caso, a melhor solução é fazer que o 
 modelo se atende a todo e qualquer detalhe no treinamento, fazendo com que o modelo não passe por uma especificidade de fraude sem detecta-lá. Em conjunto com ele, o paramêtro class_weight ajuda muito dizendo para o modelo dar mais enfoque na classe minoritária (aumenta o peso da classe fraude).
 
