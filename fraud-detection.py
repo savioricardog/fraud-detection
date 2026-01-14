@@ -123,11 +123,13 @@ print(X_train.head(3))
 # # --- INSTANTING AND FITTING MODEL ---
 #%%
 
+ratio = (y_train == 0).sum() / (y_train == 1).sum()
 lightgbm = LGBMClassifier(n_estimators=3000,
                         learning_rate= 0.01,
                         num_leaves=100,
                         max_depth=-1,
-                        class_weight={0: 1, 1: 100000},
+                        # class_weight='balanced',
+                        scale_pos_weight=ratio * 2,
                         is_unbalance = False,
                         min_child_samples = 3,
                         subsample  = 0.9,
@@ -135,7 +137,10 @@ lightgbm = LGBMClassifier(n_estimators=3000,
                         n_jobs = 5,
                         importance_type='gain',
                         objective = 'binary',
-                        verbose = -1
+                        verbose = -1,
+                        max_bin=512,
+                        boosting_type='dart',  # <-- MUDANÇA DE MOTOR
+                        xgboost_dart_mode=True,
 )
 
 first_fit = lightgbm.fit(X_train, y_train) # FITTING X_TRAIN AND Y_TRAIN
@@ -261,7 +266,6 @@ final_pack = {
 
 joblib.dump(final_pack, 'Models/model_fraud_V1.pkl')
 print(f'✅ Model saved sucessfully! Archive "model_fraud_V1" was created.')
-
 
 #%% [markdown]
 # # --- TESTING NEW PREDICT ---
