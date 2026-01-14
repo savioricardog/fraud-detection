@@ -50,7 +50,7 @@ Entregando um valor de **$9.000** dolares de prejuizo evitados, que equivalem a 
 
 3. **Execute o arquivos :**
    ```bash 
-   python fraud-detection.py
+   python fraud-detection-V2.py
 
 ## 📂 Estrutura de Arquivos 
 
@@ -60,7 +60,7 @@ fraud-detection.ipynb: Arquivo em modelo Jupyter.
 
 requirements.txt: Dependências do ambiente.
 
-models/model_fraud_V1.pkl: Modelo treinado.
+models/model_fraud_V2.pkl: Modelo treinado.
 
 
 **Desenvolvido por Savio Ricardo Garcia 👨‍💻**
